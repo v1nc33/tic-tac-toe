@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 
 import styles from "./square.module.css";
 
 const Square = (props) => {
-  const [value, setValue] = useState(null);
   return (
     <button className={styles.square} onClick={props.onClick}>
       {props.value}
