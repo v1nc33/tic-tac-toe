@@ -3,9 +3,23 @@ import styles from "./game.module.css";
 import Board from "./board";
 
 const Game = () => {
-  const [history, setHistory] = useState([{ squares: Array(9).fill(null) }]);
+  let winningSq;
+  const [history, setHistory] = useState([
+    { squares: Array(9).fill(null), location: null },
+  ]);
   const [xIsNext, setXIsNext] = useState(true);
   const [stepNumber, setStepNumber] = useState(0);
+  const [toggleDesc, setToggleDesc] = useState(true);
+
+  const showLocation = (field) => {
+    const coordinates = [];
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        coordinates.push([i + 1, j + 1]);
+      }
+    }
+    return coordinates[field];
+  };
 
   const calculateWinner = (squares) => {
     const lines = [
@@ -25,6 +39,8 @@ const Game = () => {
         squares[a] === squares[b] &&
         squares[a] === squares[c]
       ) {
+        console.log(lines[i]);
+        winningSq = lines[i];
         return squares[a];
       }
     }
@@ -39,13 +55,13 @@ const Game = () => {
       return;
     }
     squares[i] = xIsNext ? "X" : "O";
-    setHistory(gameHistory.concat([{ squares: squares }]));
+    const location = showLocation(i);
+    setHistory(gameHistory.concat([{ squares: squares, location: location }]));
     setXIsNext(!xIsNext);
     setStepNumber(gameHistory.length);
   };
 
   const jumpTo = (step) => {
-    console.log(step);
     setStepNumber(step);
     setXIsNext(step % 2 === 0);
   };
@@ -56,21 +72,44 @@ const Game = () => {
   let status;
   if (winner) {
     status = "Winner: " + winner;
+    console.log(winningSq);
+    //console.log(winningSquares);
   } else {
     status = "Next player: " + (xIsNext ? "X" : "O");
   }
 
   const moves = history.map((step, move) => {
     const desc = move ? "Go to move #" + move : "Go to game start";
+
     return (
       <li key={move}>
-        <button
-          onClick={() => {
-            jumpTo(move);
+        <div
+          style={{
+            width: "250px",
+            height: "50px",
+            display: "flex",
+            justifyContent: "space-between",
           }}
         >
-          {desc}
-        </button>
+          <button
+            style={{ fontWeight: move === stepNumber ? "600" : "300" }}
+            className={styles.button}
+            onClick={() => {
+              jumpTo(move);
+            }}
+          >
+            {desc}
+          </button>
+          <p>
+            {history[move].location
+              ? "Col: " +
+                history[move].location[1] +
+                " " +
+                "Row: " +
+                history[move].location[0]
+              : null}
+          </p>
+        </div>
       </li>
     );
   });
@@ -78,11 +117,21 @@ const Game = () => {
   return (
     <div className={styles.game}>
       <div className={styles.gameBoard}>
-        <Board onClick={(i) => handleClick(i)} squares={current.squares} />
+        <Board
+          onClick={(i) => handleClick(i)}
+          squares={current.squares}
+          win={winningSq}
+        />
       </div>
       <div className={styles.gameInfo}>
         <div>{status}</div>
-        <ol>{moves}</ol>
+        <button
+          className={styles.button}
+          onClick={() => setToggleDesc(!toggleDesc)}
+        >
+          {toggleDesc ? "Desc" : "Asce"}
+        </button>
+        <ol>{toggleDesc ? moves : moves.reverse()}</ol>
       </div>
     </div>
   );
