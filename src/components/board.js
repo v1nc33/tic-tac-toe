@@ -3,7 +3,6 @@ import styles from "./board.module.css";
 import Square from "./square";
 
 const Board = (props) => {
-  console.log(props.win);
   const renderSquare = (i) => {
     return (
       <Square
